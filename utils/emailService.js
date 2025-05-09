@@ -1,4 +1,3 @@
-// utils/emailService.js
 const nodemailer = require('nodemailer');
 
 console.log("Email user:", process.env.EMAIL_USER);
@@ -12,17 +11,18 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-/**
- * Sends an email. Can be called as:
- * sendEmail(to, subject, text)
- * OR
- * sendEmail({ to, subject, html })
- */
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('Email transporter verification failed:', error);
+  } else {
+    console.log('Email transporter is ready to send messages');
+  }
+});
+
 const sendEmail = async (toOrOptions, subject, text) => {
   let mailOptions;
 
   if (typeof toOrOptions === 'object') {
-    // Full object form
     mailOptions = {
       from: `"Auditorium Booking" <${process.env.EMAIL_USER}>`,
       to: Array.isArray(toOrOptions.to) ? toOrOptions.to.join(', ') : toOrOptions.to,
@@ -30,7 +30,6 @@ const sendEmail = async (toOrOptions, subject, text) => {
       html: toOrOptions.html
     };
   } else {
-    // Shorthand: sendEmail(to, subject, text)
     mailOptions = {
       from: `"Auditorium Booking" <${process.env.EMAIL_USER}>`,
       to: toOrOptions,
@@ -44,6 +43,7 @@ const sendEmail = async (toOrOptions, subject, text) => {
     console.log('Email sent to:', mailOptions.to);
   } catch (error) {
     console.error('Email sending failed:', error);
+    throw error; // ⚠️ important!
   }
 };
 

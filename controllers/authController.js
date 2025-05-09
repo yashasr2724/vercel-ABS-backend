@@ -115,13 +115,19 @@ const adminForgotPassword = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'Admin not found' });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const expiry = new Date(Date.now() + 10 * 60 * 1000);
 
     user.otp = otp;
     user.otpExpiresAt = expiry;
     await user.save();
 
-    await sendEmail(user.email, 'Admin Password Reset OTP', `Your OTP is: ${otp}`);
+    try {
+      await sendEmail(user.email, 'Admin Password Reset OTP', `Your OTP is: ${otp}`);
+    } catch (error) {
+      console.error("Email Error (Admin Forgot):", error);
+      return res.status(500).json({ message: 'Failed to send OTP email' });
+    }
+
     res.json({ message: 'OTP sent to your email' });
   } catch (error) {
     res.status(500).json({ message: 'Error sending OTP', error });
@@ -161,7 +167,13 @@ const hodForgotPassword = async (req, res) => {
     if (!admin) return res.status(404).json({ message: 'Admin not found' });
 
     const message = `HOD user "${hod.name}" requested a password reset.\nPlease log in and reset it from the admin panel.`;
-    await sendEmail(admin.email, 'HOD Password Reset Request', message);
+
+    try {
+      await sendEmail(admin.email, 'HOD Password Reset Request', message);
+    } catch (error) {
+      console.error("Email Error (HOD Forgot):", error);
+      return res.status(500).json({ message: 'Failed to notify admin' });
+    }
 
     res.json({ message: 'Reset request sent to admin' });
   } catch (error) {
@@ -180,12 +192,19 @@ const resetHodPassword = async (req, res) => {
     hod.password = await bcrypt.hash(newPassword, 10);
     await hod.save();
 
-    await sendEmail(hod.email, 'Your New Password', `Your new password is: ${newPassword}`);
+    try {
+      await sendEmail(hod.email, 'Your New Password', `Your new password is: ${newPassword}`);
+    } catch (error) {
+      console.error("Email Error (Reset HOD):", error);
+      return res.status(500).json({ message: 'Failed to send new password email' });
+    }
+
     res.json({ message: 'Password reset and sent to HOD email' });
   } catch (error) {
     res.status(500).json({ message: 'Error resetting HOD password', error });
   }
 };
+
 // Unified Forgot Password (Admin gets OTP, HOD triggers admin email)
 const forgotPassword = async (req, res) => {
   const { username } = req.body;
@@ -202,7 +221,13 @@ const forgotPassword = async (req, res) => {
       user.otpExpiresAt = expiry;
       await user.save();
 
-      await sendEmail(user.email, 'Admin Password Reset OTP', `Your OTP is: ${otp}`);
+      try {
+        await sendEmail(user.email, 'Admin Password Reset OTP', `Your OTP is: ${otp}`);
+      } catch (error) {
+        console.error("Email Error (Unified Admin):", error);
+        return res.status(500).json({ message: 'Failed to send OTP email' });
+      }
+
       return res.json({ message: 'OTP sent to admin email' });
     }
 
@@ -211,7 +236,13 @@ const forgotPassword = async (req, res) => {
       if (!admin) return res.status(404).json({ message: 'Admin not found' });
 
       const message = `HOD "${user.name}" has requested a password reset. Please reset it from the admin panel.`;
-      await sendEmail(admin.email, 'HOD Password Reset Request', message);
+
+      try {
+        await sendEmail(admin.email, 'HOD Password Reset Request', message);
+      } catch (error) {
+        console.error("Email Error (Unified HOD):", error);
+        return res.status(500).json({ message: 'Failed to notify admin' });
+      }
 
       return res.json({ message: 'Password reset request sent to admin' });
     }
@@ -222,7 +253,6 @@ const forgotPassword = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
-
 
 module.exports = {
   login,
