@@ -21,10 +21,9 @@ app.use(bodyParser.json({ limit: '10mb' })); // Adjust to 10mb or more
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // Middleware
-const allowedOrigins = ['https://vercel-abs-frontend-yashas.vercel.app']; // Replace with your actual frontend URL
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: 'https://vercel-abs-frontend-yashas.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
