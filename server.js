@@ -28,8 +28,6 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
-app.options('*', cors()); // Allow preflight requests
-
 app.use(express.json());
 app.use('/api/user', userRoutes);
 app.get("/", (req, res) => {
