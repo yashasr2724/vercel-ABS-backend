@@ -24,6 +24,9 @@ app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors());
 app.use(express.json());
 app.use('/api/user', userRoutes);
+app.get("/", (req, res) => {
+  res.send("Backend is running 🚀");
+});
 
 // API Routes
 app.use('/api/departments', departmentRoutes);
