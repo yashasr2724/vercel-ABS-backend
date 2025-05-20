@@ -84,7 +84,7 @@ router.put('/update-profile', verifyToken, async (req, res) => {
     if (email?.trim()) updatedFields.email = email;
     if (profilePic?.trim()) updatedFields.profilePic = profilePic;
     if (password?.trim()) {
-      updatedFields.password = await bcrypt.hash(password, 10);
+      updatedFields.password = await bcrypt.hash(password, 10); 
     }
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -99,6 +99,15 @@ router.put('/update-profile', verifyToken, async (req, res) => {
 
     res.status(200).json(updatedUser);
   } catch (err) {
+     if (err.code === 11000) {
+      if (err.keyPattern?.email) {
+        return res.status(400).json({ message: 'Email already in use' });
+      }
+      if (err.keyPattern?.username) {
+        return res.status(400).json({ message: 'Username already in use' });
+      }
+    }
+
     console.error('[UPDATE PROFILE ERROR]', err);
     res.status(500).json({ message: 'Server error updating profile' });
   }

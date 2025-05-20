@@ -61,12 +61,29 @@ const registerHOD = async (req, res) => {
     });
 
     await newUser.save();
-    res.status(201).json({ message: 'HOD registered successfully' });
+    
+    // 📧 Send email to HOD with credentials
+    await sendEmail({
+      to: email,
+      subject: 'Your HOD Account Credentials - Auditorium Booking System',
+      html: `
+        <h3>Welcome, ${name}!</h3>
+        <p>Your HOD account has been successfully created.</p>
+        <p><strong>Username:</strong> ${username}</p>
+        <p><strong>Password:</strong> ${password}</p>
+        <p>You can now log in to the system using the credentials above.</p>
+        <br/>
+        <p>Regards,<br/>Auditorium Booking Team</p>
+      `,
+    });
+
+    res.status(201).json({ message: 'HOD registered successfully and email sent' });
   } catch (err) {
     console.error('Register HOD Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 // ADMIN: Edit HOD details
 const updateHOD = async (req, res) => {

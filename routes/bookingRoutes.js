@@ -61,7 +61,15 @@ router.get('/export', verifyToken, authorizeRoles('admin'), async (req, res) => 
   }
 });
 
-
+router.get('/pending-count', verifyToken, authorizeRoles('admin'), async (req, res) => {
+  try {
+    const count = await Booking.countDocuments({ status: 'pending' });
+    res.json({ count });
+  } catch (err) {
+    console.error('Pending Count Error:', err);
+    res.status(500).json({ message: 'Failed to fetch pending booking count' });
+  }
+});
 
 router.get('/approved-times', verifyToken, getApprovedBookingsWithTimeOnly);
 
