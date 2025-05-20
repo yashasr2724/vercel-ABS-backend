@@ -236,6 +236,27 @@ router.put('/:bookingId/status', verifyToken, authorizeRoles('admin'), async (re
       }
     }
 
+    if (status === 'rejected'){
+      
+      await sendEmail({
+        to: email,
+        subject: `Your Booking Request has been REJECTED`,
+        html: `
+          <p>Hello <strong>${name}</strong>,</p>
+          <p>Your auditorium booking request has been <strong>REJECTED</strong> by the Admin.</p>
+          <p>contact admin for more details</p>
+          <p>
+            <strong>Event:</strong> ${booking.eventName}<br>
+            <strong>Start Time:</strong> ${new Date(booking.startTime).toLocaleString()}<br>
+            <strong>End Time:</strong> ${new Date(booking.endTime).toLocaleString()}<br>
+            <strong>Requirements:</strong> ${booking.requirements?.join(', ') || 'None'}
+          </p>
+          <p>Regards,<br>Auditorium Management System</p>
+        `
+      });
+
+
+    }
     res.json({ message: `Booking ${status}${status === 'approved' ? ' and notification emails sent' : ''}.` });
   } catch (err) {
     console.error('Update Status Error:', err);
